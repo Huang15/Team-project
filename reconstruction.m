@@ -2,8 +2,8 @@ clc; clear;
 
 %% Given an image folder
 
-% imageDir = fullfile('C:\Users\HUANG\Desktop\TUM\CV\project\delivery_area\images\dslr_images_undistorted');
-imageDir = fullfile('C:\Users\HUANG\Desktop\TUM\CV\project\kicker\images\dslr_images_undistorted');%Please change
+imageDir = fullfile('C:\Users\HUANG\Desktop\TUM\CV\project\delivery_area\images\dslr_images_undistorted');
+% imageDir = fullfile('C:\Users\HUANG\Desktop\TUM\CV\project\kicker\images\dslr_images_undistorted');%Please change
 imds = imageDatastore(imageDir);
 
 
@@ -25,9 +25,12 @@ end
 
 %% Giving the camera inside reference
 %Please change yourself
-imageSize =[4137 6211];
-focalLength =[3410.34 3409.98];
-principalPoint=[3121.33 2067.07];
+% imageSize =[4137 6211];
+% focalLength =[3410.34 3409.98];
+% principalPoint=[3121.33 2067.07];
+imageSize =[4135 6208];
+focalLength =[3408.59 3408.87];
+principalPoint=[3117.24 2064.07];
 intrinsics =  cameraIntrinsics(focalLength,principalPoint,imageSize);
 %% Feature finding, matching, triangulation
 
@@ -59,8 +62,8 @@ for i = 2:numel(images)
     matchedPoints2 = Points{i}(indexPairs_k(:, 2));
 
     % estimateFundamentalMatrix
-    [F, inlierIdx] = estimateFundamentalMatrix(matchedPoints1.Location, matchedPoints2.Location, Method="RANSAC", NumTrials=5000, DistanceThreshold=1e-4);
-    E =intrinsics.K'*F*intrinsics.K;
+    [E, inlierIdx] = estimateEssentialMatrix(matchedPoints1.Location, matchedPoints2.Location,...
+        intrinsics);
     inlierPoints1 = matchedPoints1.Location(inlierIdx, :);
     inlierPoints2 = matchedPoints2.Location(inlierIdx, :);  
     
@@ -71,7 +74,7 @@ for i = 2:numel(images)
     
     % Get the table containing the previous camera pose.
     prevPose = poses(vSet, i-k).AbsolutePose;
-    currPose = rigidtform3d(prevPose.A*relPose.A);
+    currPose = rigidtform3d(prevPose.A*relPose(1).A);
     
     % Add the current view to the view set.
     vSet = addView(vSet, i, currPose, Points=Points{i});
