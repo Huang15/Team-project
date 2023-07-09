@@ -6,7 +6,7 @@ It is the repository of the final challenge project for Computer Vision (SS23) a
 ## Introductoin
 Lecturer: Prof. Dr.-Ing. Klaus Diepold
 
-Assistant: Luca Sacchetto, Stefan Röhrl
+Assistant: Luca Sacchetto, Sven Gronauer
 
 Team Member:
 - Feng Xu
