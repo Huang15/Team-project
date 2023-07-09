@@ -3,7 +3,7 @@
 
 It is the repository of the final challenge project for Computer Vision (SS23) at Technical University Munich.
 
-# Introductoin
+## Introductoin
 Lecturer: Prof. Dr.-Ing. Klaus Diepold
 
 Assistant: Luca Sacchetto, Stefan Röhrl
