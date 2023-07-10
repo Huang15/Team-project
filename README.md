@@ -24,12 +24,18 @@ This project develops an application that allows customers to check the interior
 > :keyboard: : GUI develop kit: **APP designer**
 
 
-The GUI looks like this:
-![gui](https://github.com/Huang15/Team-project/assets/128314731/6b872082-f6c3-4f8d-8213-32def57c9612)
 
-##TODO
+First, open the `CV_challenge.mlapp` in the current folder.
+![step1_1](https://github.com/Huang15/Team-project/assets/128314731/69c3e8b7-98b7-42f1-b5ef-cdb64c6cac1e)
+
+Next, click the `Run` button. Alternatively, you can click `Code View` to see the code of GUI.
+![step2](https://github.com/Huang15/Team-project/assets/128314731/4620a07d-7de4-4412-8ffe-0c7c1f0af4ed)
+
+The GUI looks like this.
+![step3](https://github.com/Huang15/Team-project/assets/128314731/f8a1dd0c-1ddc-46cb-a896-8de0fc3ddfcd)
 
 
-
+Select the folder of the images you want to upload. Also select the folder containing the camera paramters. Camera parameters will be displayed automatically. Then click `Confirm` and `Run`.![step5](https://github.com/Huang15/Team-project/assets/128314731/f146597b-795e-49b5-a6d2-eb64e0fec9c8)
+After running, the 3D point cloud will be displayed. You can drag to view it from different positions. If you want to try a new image, please use the `Reset` button.
 
 
