@@ -17,7 +17,7 @@ Team Member:
 
 This project develops an application that allows customers to check the interior of a 3D scene of their own apartment. The customer is able to easily upload their own captured images of the room into the application and receive a 3D model of the interior space.
 ## GUI User's Guide
-> :computer: : work both for **Windows**
+> :computer: : work for **Windows**
 >
 > :rocket: : MATLAB Version: at least **MATLAB R2023a** and Toolbox **Computer Vision Toolbox** must be installed
 > 
