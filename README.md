@@ -24,18 +24,29 @@ This project develops an application that allows customers to check the interior
 > :keyboard: : GUI develop kit: **APP designer**
 
 
-
+### Step1
 First, open the `CV_challenge.mlapp` in the current folder.
-![step1_1](https://github.com/Huang15/Team-project/assets/128314731/69c3e8b7-98b7-42f1-b5ef-cdb64c6cac1e)
+![step1](https://github.com/Huang15/Team-project/assets/128314731/694cb85c-9cf2-4ab5-8dfd-fae9ee6e1d25)
 
+### Step2
 Next, click the `Run` button. Alternatively, you can click `Code View` to see the code of GUI.
-![step2](https://github.com/Huang15/Team-project/assets/128314731/4620a07d-7de4-4412-8ffe-0c7c1f0af4ed)
+![step2 (2)](https://github.com/Huang15/Team-project/assets/128314731/c73d9f23-ffbe-4bcb-9625-1b602e9821ec)
+
+
 
 The GUI looks like this.
-![step3](https://github.com/Huang15/Team-project/assets/128314731/f8a1dd0c-1ddc-46cb-a896-8de0fc3ddfcd)
+![gui (2)](https://github.com/Huang15/Team-project/assets/128314731/cd102ecc-eabd-4911-92d9-3c958dbdc66a)
 
 
-Select the folder of the images you want to upload. Also select the folder containing the camera paramters. Camera parameters will be displayed automatically. Then click `Confirm` and `Run`.![step5](https://github.com/Huang15/Team-project/assets/128314731/f146597b-795e-49b5-a6d2-eb64e0fec9c8)
-After running, the 3D point cloud will be displayed. You can drag to view it from different positions. If you want to try a new image, please use the `Reset` button.
+### Step3
+Select the folder of the images you want to upload. Also select the folder containing the camera paramters. Camera parameters will be displayed automatically. Then click `Confirm`. The first two lights should be green and then you can click `Run` to start the computation.
+![屏幕截图(192)](https://github.com/Huang15/Team-project/assets/128314731/cd79f590-a2a5-48df-8437-722b707cbefa)
 
+After running, the point cloud and 3D model will be displayed. Figure 1 is the point cloud without clustering and figure 2 with clustering. 
+
+
+![fig1](https://github.com/Huang15/Team-project/assets/128314731/c8b3dfc1-6c8b-4955-b892-dea3c0e0b086)
+![fig2](https://github.com/Huang15/Team-project/assets/128314731/ab24fbd2-545d-42a4-918a-9847a4e8cf7d)
+3D model is shown in the center of the interface. You can drag to view it from different positions. On the right side of the 3D model, volume of each object and the distance between their center and original point are shown. If you want to try a new image, please use the `Reset` button.
+![3d](https://github.com/Huang15/Team-project/assets/128314731/0e2fe245-746a-4596-96f8-9014784c712c)
 
