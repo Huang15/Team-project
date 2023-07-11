@@ -2,8 +2,8 @@ clc; clear;
 
 %% Given an image folder
 
-imageDir = fullfile('C:\Users\HUANG\Desktop\TUM\CV\project\delivery_area\images\dslr_images_undistorted');
-% imageDir = fullfile('C:\Users\HUANG\Desktop\TUM\CV\project\kicker\images\dslr_images_undistorted');%Please change
+% imageDir = fullfile('C:\Users\HUANG\Desktop\TUM\CV\project\delivery_area\images\dslr_images_undistorted');
+imageDir = fullfile('C:\Users\HUANG\Desktop\TUM\CV\project\kicker\images\dslr_images_undistorted');%Please change
 imds = imageDatastore(imageDir);
 
 
@@ -15,23 +15,28 @@ Points =cell(1, num_img);
 Features=cell(1, num_img);
 gray_img=cell(1, num_img);
 
-%% Loading and pre-processing images
-
-for i = 1:num_img
-    I = readimage(imds, i);
-    gray_img{i}= medfilt2(im2gray(I));
-end
 
 
 %% Giving the camera inside reference
 %Please change yourself
-% imageSize =[4137 6211];
-% focalLength =[3410.34 3409.98];
-% principalPoint=[3121.33 2067.07];
-imageSize =[4135 6208];
-focalLength =[3408.59 3408.87];
-principalPoint=[3117.24 2064.07];
+imageSize =[4137 6211];
+focalLength =[3410.34 3409.98];
+principalPoint=[3121.33 2067.07];
+% imageSize =[4135 6208];
+% focalLength =[3408.59 3408.87];
+% principalPoint=[3117.24 2064.07];
 intrinsics =  cameraIntrinsics(focalLength,principalPoint,imageSize);
+
+%% Loading and pre-processing images
+
+for i = 1:num_img
+    I = readimage(imds, i);
+    I =im2gray(I);
+    I = imresize(I, imageSize);
+    gray_img{i}= medfilt2(I);
+    
+end
+
 %% Feature finding, matching, triangulation
 
 % Give the features of the first picture
@@ -61,7 +66,7 @@ for i = 2:numel(images)
     matchedPoints1 = Points{i-k}(indexPairs_k(:, 1));
     matchedPoints2 = Points{i}(indexPairs_k(:, 2));
 
-    % estimateFundamentalMatrix
+    % estimateEssentialMatrix
     [E, inlierIdx] = estimateEssentialMatrix(matchedPoints1.Location, matchedPoints2.Location,...
         intrinsics);
     inlierPoints1 = matchedPoints1.Location(inlierIdx, :);
@@ -80,7 +85,7 @@ for i = 2:numel(images)
     vSet = addView(vSet, i, currPose, Points=Points{i});
     
     % Store the point matches between the previous and the current views.
-    vSet = addConnection(vSet, i-k, i, relPose, Matches=indexPairs_k(inlierIdx,:));
+    vSet = addConnection(vSet, i-k, i, relPose(1), Matches=indexPairs_k(inlierIdx,:));
     
     tracks = findTracks(vSet);
 
@@ -124,18 +129,23 @@ camorbit(0, -30);
 
 
 ptCloud = pointCloud(xyzPoints);
+ptCloud = pcdenoise(ptCloud);
 % parameter, adjustable, which determines which points are considered to be part of the same object
 distanceThreshold = 1.0; 
 % parameter, which can be adjusted, determines the minimum number of points needed for an object
-numClusterPoints = 100;  
+numClusterPoints = 10;  
 
 % Splitting point clouds using the pcsegdist function
-labels = pcsegdist(ptCloud, distanceThreshold, 'NumClusterPoints', numClusterPoints);
+[labels,numClusters] = pcsegdist(ptCloud, distanceThreshold, 'NumClusterPoints', numClusterPoints);
+
+%  idxValidPoints = find(labels);
+% labelColorIndex = labels(idxValidPoints);
 
 % Using labels to segment point clouds
-segmentedClouds = cell(max(labels),1);
-for i = 1:max(labels)
-    segmentedClouds{i} = select(ptCloud, labels == i);
+ segmentedClouds = cell(numClusters,1);
+for i = 1:numClusters
+    indices = find(labels == i);
+    segmentedClouds{i} = select(ptCloud, indices);
 end
 
 figure;
@@ -152,6 +162,9 @@ colors = jet(numel(segmentedClouds));
 
 % Create a new figure
 figure;
+volume=cell(1,numel(segmentedClouds));
+distanc=cell(1,numel(segmentedClouds));
+
 
 % Create an alpha shape for each cluster and plot it on the same graph
 for i = 1:numel(segmentedClouds)
@@ -163,15 +176,64 @@ for i = 1:numel(segmentedClouds)
         continue;
     end
 
-    % Create alpha shape
-    shp = alphaShape(xyzPointsCurrent(:,1), xyzPointsCurrent(:,2), xyzPointsCurrent(:,3));
-
-    % Draws an alpha shape and assigns a colour to it
-    plot(shp, 'FaceColor', colors(i, :), 'EdgeColor', 'k');
+    minX = min(xyzPointsCurrent(:, 1));
+    maxX = max(xyzPointsCurrent(:, 1));
+    minY = min(xyzPointsCurrent(:, 2));
+    maxY = max(xyzPointsCurrent(:, 2));
+    minZ = min(xyzPointsCurrent(:, 3));
+    maxZ = max(xyzPointsCurrent(:, 3));
+    vertices = [minX, minY, minZ;
+                maxX, minY, minZ;
+                maxX, maxY, minZ;
+                minX, maxY, minZ;
+                minX, minY, maxZ;
+                maxX, minY, maxZ;
+                maxX, maxY, maxZ;
+                minX, maxY, maxZ];
+    % Calculating the volume and position of an object
+    edgeLengths = max(vertices) - min(vertices);
+    volume{i} = prod(edgeLengths);
+    distanc{i} =sqrt((maxX+minX)^2+(maxY+minY)^2+(maxZ+minZ)^2);
     hold on;
+    % 
+    grid on;
+    axis equal;
+    axis equal
+    xlabel('x')
+    ylabel('y')
+    zlabel('z(t)')
+    plot3(vertices([1 2 3 4 1], 1), vertices([1 2 3 4 1], 2), vertices([1 2 3 4 1], 3), 'r-', 'LineWidth', 2);
+    plot3(vertices([5 6 7 8 5], 1), vertices([5 6 7 8 5], 2), vertices([5 6 7 8 5], 3), 'r-', 'LineWidth', 2);
+    plot3([vertices(1, 1) vertices(5, 1)], [vertices(1, 2) vertices(5, 2)], [vertices(1, 3) vertices(5, 3)], 'r-', 'LineWidth', 2);
+    plot3([vertices(2, 1) vertices(6, 1)], [vertices(2, 2) vertices(6, 2)], [vertices(2, 3) vertices(6, 3)], 'r-', 'LineWidth', 2);
+    plot3([vertices(3, 1) vertices(7, 1)], [vertices(3, 2) vertices(7, 2)], [vertices(3, 3) vertices(7, 3)], 'r-', 'LineWidth', 2);
+    plot3([vertices(4, 1) vertices(8, 1)], [vertices(4, 2) vertices(8, 2)], [vertices(4, 3) vertices(8, 3)], 'r-', 'LineWidth', 2);
+
 end
+% Find the furthest point cloud clusters and generate walls
+zMin = ptCloud.ZLimits(1);
+% zMax = ptCloud.ZLimits(2);
+zMax = max(cellfun(@(x) x.ZLimits(2), segmentedClouds));
+xMin = ptCloud.XLimits(1);
+xMax = ptCloud.XLimits(2);
+yMin = ptCloud.YLimits(1);
+yMax = ptCloud.YLimits(2);
+
+faces = [1, 2, 6, 5; 2, 3, 7, 6; 3, 4, 8, 7; 4, 1, 5, 8; 1, 2, 3, 4; 5, 6, 7, 8];
+faceColor = [245/255 245/255 220/255];
+wallz=[xMin,yMin,zMin;xMin,yMax,zMin;xMax,yMax,zMin;xMax,yMin,zMin;xMin,yMin,zMin-1;xMin,yMax,zMin-1;xMax,yMax,zMin-1;xMax,yMin,zMin-1];
+wallx_link=[xMin,yMin,zMin;xMin,yMin,zMax;xMin,yMax,zMax;xMin,yMax,zMin;xMin-1,yMin,zMin;xMin-1,yMin,zMax;xMin-1,yMax,zMax;xMin-1,yMax,zMin];
+wallx_recht=[xMax,yMin,zMin;xMax,yMin,zMax;xMax,yMax,zMax;xMax,yMax,zMin;xMax+1,yMin,zMin;xMax+1,yMin,zMax;xMax+1,yMax,zMax;xMax+1,yMax,zMin];
+wally_vor=[xMin,yMin,zMin;xMin,yMin,zMax;xMax,yMin,zMax;xMax,yMin,zMin;xMin,yMin-1,zMin;xMin,yMin-1,zMax;xMax,yMin-1,zMax;xMax,yMin-1,zMin];
+wally_hunter=[xMin,yMax,zMin;xMin,yMax,zMax;xMax,yMax,zMax;xMax,yMax,zMin;xMin,yMax+1,zMin;xMin,yMax+1,zMax;xMax,yMax+1,zMax;xMax,yMax+1,zMin];
+patch('Vertices', wallz, 'Faces', faces, 'FaceColor', faceColor, "FaceAlpha" , 0.5,'EdgeColor', 'none');
+patch('Vertices', wallx_link, 'Faces', faces, 'FaceColor', faceColor,"FaceAlpha" , 0.5, 'EdgeColor', 'none');
+patch('Vertices', wallx_recht, 'Faces', faces, 'FaceColor', faceColor,"FaceAlpha" , 0.1, 'EdgeColor', 'none');
+patch('Vertices', wally_vor, 'Faces', faces, 'FaceColor', faceColor,"FaceAlpha" , 0.1, 'EdgeColor', 'none');
+patch('Vertices', wally_hunter, 'Faces', faces, 'FaceColor', faceColor,"FaceAlpha" , 0.5, 'EdgeColor', 'none');
 hold off;
 
 title('3D Alpha Shapes for All Clusters');
+
 
 
